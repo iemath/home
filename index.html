@@ -43,7 +43,6 @@
             border-radius: var(--border-radius);
             margin-bottom: 20px;
             box-shadow: var(--box-shadow);
-            position: relative;
         }
 
         header h1 {
@@ -157,12 +156,14 @@
             border-radius: 5px;
             font-size: 1rem;
             transition: border-color 0.3s;
+            background-color: #f9f9f9;
         }
 
         .form-group input:focus,
         .form-group select:focus {
             border-color: var(--primary-color);
             outline: none;
+            background-color: #fff;
         }
 
         .form-group input[required] {
@@ -182,6 +183,15 @@
 
         .form-group button:hover {
             background-color: var(--secondary-color);
+        }
+
+        .register-form {
+            max-width: 600px;
+            margin: 0 auto;
+            background: linear-gradient(135deg, #e6f0fa, #f0f4f8);
+            padding: 30px;
+            border-radius: var(--border-radius);
+            box-shadow: var(--box-shadow);
         }
 
         .table-container {
@@ -250,6 +260,30 @@
             background-color: #fdecea;
         }
 
+        .last-updated {
+            text-align: right;
+            font-style: italic;
+            color: #7f8c8d;
+            margin-bottom: 20px;
+        }
+
+        .refresh-btn {
+            background-color: var(--primary-color);
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: var(--border-radius);
+            cursor: pointer;
+            font-size: 1rem;
+            transition: background-color 0.3s;
+            display: block;
+            margin: 0 auto 20px;
+        }
+
+        .refresh-btn:hover {
+            background-color: var(--secondary-color);
+        }
+
         footer {
             text-align: center;
             padding: 30px;
@@ -316,16 +350,63 @@
 
         <div class="section" id="register">
             <h2>Đăng ký học</h2>
-            <iframe src="https://docs.google.com/forms/d/1hRLcla8SMuMD9e5_VqQinrQo7cfDPOOtnilM57z1PI4/edit" width="100%" height="800px" frameborder="0" marginheight="0" marginwidth="0">Đang tải...</iframe>
+            <form id="registerForm" class="register-form">
+                <div class="form-group">
+                    <label for="studentName">Tên học sinh <span style="color: red;">*</span></label>
+                    <input type="text" id="studentName" required placeholder="Nhập tên học sinh">
+                </div>
+                <div class="form-group">
+                    <label for="parentName">Tên phụ huynh</label>
+                    <input type="text" id="parentName" placeholder="Nhập tên phụ huynh">
+                </div>
+                <div class="form-group">
+                    <label for="class">Lớp</label>
+                    <select id="class">
+                        <option value="">Chọn lớp</option>
+                        <option value="6">Lớp 6</option>
+                        <option value="7">Lớp 7</option>
+                        <option value="8">Lớp 8</option>
+                        <option value="9">Lớp 9</option>
+                        <option value="10">Lớp 10</option>
+                        <option value="11">Lớp 11</option>
+                        <option value="12">Lớp 12</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="subject">Môn học</label>
+                    <input type="text" id="subject" placeholder="Nhập môn học">
+                </div>
+                <div class="form-group">
+                    <label for="school">Trường</label>
+                    <input type="text" id="school" placeholder="Nhập tên trường">
+                </div>
+                <div class="form-group">
+                    <label for="address">Địa chỉ</label>
+                    <input type="text" id="address" placeholder="Nhập địa chỉ">
+                </div>
+                <div class="form-group">
+                    <label for="phone">Số điện thoại liên hệ <span style="color: red;">*</span></label>
+                    <input type="tel" id="phone" required placeholder="Nhập số điện thoại">
+                </div>
+                <div class="form-group">
+                    <label for="social">Zalo/Facebook</label>
+                    <input type="text" id="social" placeholder="Nhập Zalo/Facebook">
+                </div>
+                <div class="form-group">
+                    <button type="submit">Đăng ký</button>
+                </div>
+            </form>
         </div>
 
         <div class="section" id="scores">
             <h2>Bảng điểm học sinh</h2>
             <div class="form-group">
-                <label for="scoreCode">Nhập mã để xem bảng điểm</label>
-                <input type="text" id="scoreCode" placeholder="Ví dụ: HSLH07">
+                <label for="scoreCode">Nhập mã học sinh để xem bảng điểm</label>
+                <input type="text" id="scoreCode" placeholder="Ví dụ: HS001">
                 <button onclick="loadScores()">Xem</button>
             </div>
+            <div class="last-updated" id="scoreLastUpdated">Cập nhật lúc: Chưa tải dữ liệu</div>
+            <button class="refresh-btn" onclick="loadScores()"><i class="fas fa-sync-alt"></i> Làm mới dữ liệu</button>
             <div id="scoreError" class="error-message" style="display: none;"></div>
             <div class="table-container" id="scoreTable">
                 <!-- Bảng điểm sẽ được thêm vào đây -->
@@ -335,10 +416,12 @@
         <div class="section" id="competition">
             <h2>Kết quả thi đua</h2>
             <div class="form-group">
-                <label for="competitionCode">Nhập mã để xem kết quả thi đua</label>
-                <input type="text" id="competitionCode" placeholder="Ví dụ: HST07">
+                <label for="competitionCode">Nhập mã lớp để xem kết quả thi đua</label>
+                <input type="text" id="competitionCode" placeholder="Ví dụ: HSLH07">
                 <button onclick="loadCompetition()">Xem</button>
             </div>
+            <div class="last-updated" id="competitionLastUpdated">Cập nhật lúc: Chưa tải dữ liệu</div>
+            <button class="refresh-btn" onclick="loadCompetition()"><i class="fas fa-sync-alt"></i> Làm mới dữ liệu</button>
             <div id="competitionError" class="error-message" style="display: none;"></div>
             <div class="table-container" id="competitionTable">
                 <!-- Bảng kết quả thi đua sẽ được thêm vào đây -->
@@ -356,8 +439,7 @@
     <script>
         // API Key và Spreadsheet ID
         const apiKey = 'AIzaSyDeU6hRBATWrsagRwk4n80-K8ZhpOiYuaQ'; // Thay bằng API Key của bạn
-        const spreadsheetId = '1kT4hROpJaGR9gmBPt-m4Q-HprqTe-GlaejQxnvwwD9I';
-        const sheetName = 'Trang tính1!A:D'; // Điều chỉnh phạm vi nếu cần
+        const spreadsheetId = '1Pu-iUUpGsofrBbInwmns7vLai1_gwmDEvbWvGnYjd8I';
 
         // Hiển thị section
         function showSection(sectionId) {
@@ -368,6 +450,20 @@
             if (sectionId === 'home') {
                 loadHonorTable();
             }
+        }
+
+        // Hàm định dạng ngày giờ
+        function formatDateTime(date) {
+            const options = { 
+                day: '2-digit', 
+                month: '2-digit', 
+                year: 'numeric', 
+                hour: '2-digit', 
+                minute: '2-digit', 
+                second: '2-digit',
+                hour12: false
+            };
+            return new Intl.DateTimeFormat('vi-VN', options).format(date);
         }
 
         // Hàm tạo bảng
@@ -458,7 +554,7 @@
         // Hàm tải bảng vinh danh
         async function loadHonorTable() {
             try {
-                const data = await fetchSheetData('Honor');
+                const data = await fetchSheetData('Vinh danh');
                 const table = createHonorTable(data);
                 document.getElementById('honorTable').innerHTML = '';
                 document.getElementById('honorTable').appendChild(table);
@@ -467,47 +563,32 @@
             }
         }
 
-        // Hàm kiểm tra mã phân quyền
-        async function checkPermission(code, type) {
-            const data = await fetchSheetData('Permission');
-            for (let i = 1; i < data.length; i++) {
-                if (data[i][0] === code && data[i][2] === type) {
-                    return data[i][1]; // Trả về tên lớp
-                }
-            }
-            return null;
-        }
-
         // Hàm tải bảng điểm
         async function loadScores() {
             const code = document.getElementById('scoreCode').value;
             const errorElement = document.getElementById('scoreError');
             const tableElement = document.getElementById('scoreTable');
+            const lastUpdatedElement = document.getElementById('scoreLastUpdated');
             errorElement.style.display = 'none';
             tableElement.innerHTML = '';
 
             try {
-                const className = await checkPermission(code, 'Bảng điểm');
-                if (!className) {
-                    errorElement.textContent = 'Mã không hợp lệ hoặc không có quyền xem bảng điểm này.';
-                    errorElement.style.display = 'block';
-                    return;
-                }
-
-                const data = await fetchSheetData('Scores');
+                const data = await fetchSheetData('Bảng điểm');
                 const filteredData = [data[0]]; // Giữ hàng tiêu đề
                 for (let i = 1; i < data.length; i++) {
-                    if (data[i][2] === className) {
+                    if (data[i][0] === code) { // So khớp với cột Mã học sinh (cột 0)
                         filteredData.push(data[i]);
+                        break;
                     }
                 }
                 if (filteredData.length === 1) {
-                    errorElement.textContent = 'Không có dữ liệu cho lớp này.';
+                    errorElement.textContent = 'Không tìm thấy mã học sinh này.';
                     errorElement.style.display = 'block';
                     return;
                 }
                 const table = createTable(filteredData);
                 tableElement.appendChild(table);
+                lastUpdatedElement.textContent = `Cập nhật lúc: ${formatDateTime(new Date())}`;
             } catch (error) {
                 errorElement.textContent = error.message;
                 errorElement.style.display = 'block';
@@ -519,36 +600,65 @@
             const code = document.getElementById('competitionCode').value;
             const errorElement = document.getElementById('competitionError');
             const tableElement = document.getElementById('competitionTable');
+            const lastUpdatedElement = document.getElementById('competitionLastUpdated');
             errorElement.style.display = 'none';
             tableElement.innerHTML = '';
 
             try {
-                const className = await checkPermission(code, 'Kết quả thi đua');
-                if (!className) {
-                    errorElement.textContent = 'Mã không hợp lệ hoặc không có quyền xem kết quả thi đua này.';
-                    errorElement.style.display = 'block';
-                    return;
-                }
-
-                const data = await fetchSheetData('Competition');
-                const filteredData = [data[0]]; // Giữ hàng tiêu đề
+                const data = await fetchSheetData('TĐHKT2T3');
+                const filteredData = [['Tên', 'Lớp', 'Tổng điểm', 'Xếp hạng']]; // Chỉ lấy 4 cột
                 for (let i = 1; i < data.length; i++) {
-                    if (data[i][2] === className) {
-                        filteredData.push(data[i]);
+                    if (data[i][2] === code) { // So khớp với cột Lớp (cột 2)
+                        filteredData.push([data[i][1], data[i][2], data[i][3], data[i][4]]); // Lấy cột Tên, Lớp, Tổng điểm, Xếp hạng
                     }
                 }
                 if (filteredData.length === 1) {
-                    errorElement.textContent = 'Không có dữ liệu cho lớp này.';
+                    errorElement.textContent = 'Không tìm thấy dữ liệu cho mã lớp này.';
                     errorElement.style.display = 'block';
                     return;
                 }
-                const table = createTable(filteredData, 4); // Cột Xếp hạng là cột thứ 5 (chỉ số 4)
+                const table = createTable(filteredData, 3); // Cột Xếp hạng là cột thứ 4 (chỉ số 3)
                 tableElement.appendChild(table);
+                lastUpdatedElement.textContent = `Cập nhật lúc: ${formatDateTime(new Date())}`;
             } catch (error) {
                 errorElement.textContent = error.message;
                 errorElement.style.display = 'block';
             }
         }
+
+        // Xử lý form đăng ký
+        document.getElementById('registerForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            const formData = {
+                studentName: document.getElementById('studentName').value,
+                parentName: document.getElementById('parentName').value,
+                class: document.getElementById('class').value,
+                subject: document.getElementById('subject').value,
+                school: document.getElementById('school').value,
+                address: document.getElementById('address').value,
+                phone: document.getElementById('phone').value,
+                social: document.getElementById('social').value
+            };
+
+            try {
+                const response = await fetch('THAY_BANG_URL_APPS_SCRIPT_CUA_BAN', {
+                    method: 'POST',
+                    body: JSON.stringify(formData),
+                    headers: {
+                        'Content-Type': 'application/json'
+                    }
+                });
+                const result = await response.json();
+                if (result.status === 'success') {
+                    alert('Đăng ký thành công! Chúng tôi sẽ liên hệ với bạn sớm.');
+                    this.reset();
+                } else {
+                    alert('Đăng ký thất bại: ' + result.message);
+                }
+            } catch (error) {
+                alert('Lỗi khi gửi dữ liệu: ' + error.message);
+            }
+        });
 
         // Tải bảng vinh danh khi trang được tải
         loadHonorTable();
