@@ -86,6 +86,9 @@
             padding: 12px 25px;
             border-radius: 5px;
             transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 10px;
         }
 
         nav ul li a:hover {
@@ -93,6 +96,10 @@
             color: white;
             transform: translateY(-2px);
             box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        nav ul li a i {
+            font-size: 1.2rem;
         }
 
         .banner {
@@ -326,10 +333,10 @@
 
         <nav>
             <ul>
-                <li><a href="#home" onclick="showSection('home')">Trang chủ</a></li>
-                <li><a href="#register" onclick="showSection('register')">Đăng ký học</a></li>
-                <li><a href="#scores" onclick="showSection('scores')">Bảng điểm học sinh</a></li>
-                <li><a href="#competition" onclick="showSection('competition')">Kết quả thi đua</a></li>
+                <li><a href="#home" onclick="showSection('home')"><i class="fas fa-home"></i> Trang chủ</a></li>
+                <li><a href="#register" onclick="showSection('register')"><i class="fas fa-user-plus"></i> Đăng ký học</a></li>
+                <li><a href="#scores" onclick="showSection('scores')"><i class="fas fa-table"></i> Bảng điểm học sinh</a></li>
+                <li><a href="#competition" onclick="showSection('competition')"><i class="fas fa-trophy"></i> Kết quả thi đua</a></li>
             </ul>
         </nav>
 
@@ -507,7 +514,7 @@
             table.className = 'honor-table';
             const thead = document.createElement('thead');
             const headerRow = document.createElement('tr');
-            ['Tên', 'Lớp', 'Điểm giữa kì II', 'Thành tích'].forEach(header => {
+            ['Tên', 'Lớp', 'Xếp hạng', 'Thành tích'].forEach(header => {
                 const th = document.createElement('th');
                 th.textContent = header;
                 headerRow.appendChild(th);
@@ -565,7 +572,7 @@
 
         // Hàm tải bảng điểm
         async function loadScores() {
-            const code = document.getElementById('scoreCode').value;
+            const code = document.getElementById('scoreCode').value.trim(); // Loại bỏ khoảng trống
             const errorElement = document.getElementById('scoreError');
             const tableElement = document.getElementById('scoreTable');
             const lastUpdatedElement = document.getElementById('scoreLastUpdated');
@@ -576,7 +583,7 @@
                 const data = await fetchSheetData('Bảng điểm');
                 const filteredData = [data[0]]; // Giữ hàng tiêu đề
                 for (let i = 1; i < data.length; i++) {
-                    if (data[i][0] === code) { // So khớp với cột Mã học sinh (cột 0)
+                    if (data[i][0] && data[i][0].trim() === code) { // So khớp với cột Mã học sinh (cột 0)
                         filteredData.push(data[i]);
                         break;
                     }
@@ -597,7 +604,7 @@
 
         // Hàm tải kết quả thi đua
         async function loadCompetition() {
-            const code = document.getElementById('competitionCode').value;
+            const code = document.getElementById('competitionCode').value.trim(); // Loại bỏ khoảng trống
             const errorElement = document.getElementById('competitionError');
             const tableElement = document.getElementById('competitionTable');
             const lastUpdatedElement = document.getElementById('competitionLastUpdated');
@@ -606,10 +613,19 @@
 
             try {
                 const data = await fetchSheetData('HKT2T3');
-                const filteredData = [['Tên', 'Lớp', 'Tổng điểm', 'Xếp hạng']]; // Chỉ lấy 4 cột
+                const headers = data[0];
+                const classColumnIndex = headers.indexOf('Mã lớp');
+                if (classColumnIndex === -1) {
+                    throw new Error('Không tìm thấy cột "Mã lớp" trong bảng dữ liệu');
+                }
+
+                // Lọc dữ liệu và loại bỏ cột Mã lớp
+                const filteredHeaders = headers.filter((_, index) => index !== classColumnIndex);
+                const filteredData = [filteredHeaders];
                 for (let i = 1; i < data.length; i++) {
-                    if (data[i][2] === code) { // So khớp với cột Lớp (cột 2)
-                        filteredData.push([data[i][1], data[i][2], data[i][3], data[i][4]]); // Lấy cột Tên, Lớp, Tổng điểm, Xếp hạng
+                    if (data[i][classColumnIndex] && data[i][classColumnIndex].trim() === code) {
+                        const rowData = data[i].filter((_, index) => index !== classColumnIndex);
+                        filteredData.push(rowData);
                     }
                 }
                 if (filteredData.length === 1) {
@@ -617,7 +633,9 @@
                     errorElement.style.display = 'block';
                     return;
                 }
-                const table = createTable(filteredData, 3); // Cột Xếp hạng là cột thứ 4 (chỉ số 3)
+
+                const rankColumnIndex = filteredHeaders.indexOf('Xếp hạng');
+                const table = createTable(filteredData, rankColumnIndex);
                 tableElement.appendChild(table);
                 lastUpdatedElement.textContent = `Cập nhật lúc: ${formatDateTime(new Date())}`;
             } catch (error) {
