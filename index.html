@@ -507,7 +507,7 @@
             table.className = 'honor-table';
             const thead = document.createElement('thead');
             const headerRow = document.createElement('tr');
-            ['Tên', 'Lớp', 'Xếp hạng', 'Thành tích'].forEach(header => {
+            ['Tên', 'Lớp', 'Điểm giữa kì II', 'Thành tích'].forEach(header => {
                 const th = document.createElement('th');
                 th.textContent = header;
                 headerRow.appendChild(th);
@@ -605,7 +605,7 @@
             tableElement.innerHTML = '';
 
             try {
-                const data = await fetchSheetData('TĐHKT2T3');
+                const data = await fetchSheetData('HKT2T3');
                 const filteredData = [['Tên', 'Lớp', 'Tổng điểm', 'Xếp hạng']]; // Chỉ lấy 4 cột
                 for (let i = 1; i < data.length; i++) {
                     if (data[i][2] === code) { // So khớp với cột Lớp (cột 2)
