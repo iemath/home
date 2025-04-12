@@ -267,6 +267,16 @@
             background-color: #fdecea;
         }
 
+        .success-message {
+            color: var(--success-color);
+            text-align: center;
+            padding: 15px;
+            border: 1px solid var(--success-color);
+            border-radius: var(--border-radius);
+            margin: 20px 0;
+            background-color: #e8f5e9;
+        }
+
         .last-updated {
             text-align: right;
             font-style: italic;
@@ -341,7 +351,7 @@
         </nav>
 
         <div class="banner">
-            Vinh danh học sinh xuất sắc năm, tháng, tuần
+            Bứt phá lên đỉnh cuối học kì 2
         </div>
 
         <div class="section active" id="home">
@@ -357,6 +367,7 @@
 
         <div class="section" id="register">
             <h2>Đăng ký học</h2>
+            <div id="registerMessage" style="display: none;"></div>
             <form id="registerForm" class="register-form">
                 <div class="form-group">
                     <label for="studentName">Tên học sinh <span style="color: red;">*</span></label>
@@ -654,7 +665,7 @@
             }
 
             try {
-                const sheetName = 'HK2T3'; // Thay bằng tên chính xác của sheet
+                const sheetName = 'HK2T3'; // Sửa tên sheet thành HK2T3
                 const data = await fetchSheetData(sheetName);
                 if (!data || data.length === 0) {
                     throw new Error(`Không có dữ liệu trong sheet ${sheetName}`);
@@ -696,26 +707,58 @@
             }
         }
 
+        // Hàm kiểm tra định dạng số điện thoại
+        function validatePhoneNumber(phone) {
+            const phonePattern = /^[0-9]{10,11}$/; // Định dạng: 10 hoặc 11 số
+            return phonePattern.test(phone);
+        }
+
         // Xử lý form đăng ký
         document.getElementById('registerForm').addEventListener('submit', async function(e) {
             e.preventDefault();
+
+            const messageElement = document.getElementById('registerMessage');
+            messageElement.style.display = 'none';
+
+            // Lấy dữ liệu từ form
             const formData = {
-                timestamp: new Date().toISOString(), // Thêm thời gian đăng ký
-                studentName: document.getElementById('studentName').value,
-                parentName: document.getElementById('parentName').value,
+                studentName: document.getElementById('studentName').value.trim(),
+                parentName: document.getElementById('parentName').value.trim(),
                 class: document.getElementById('class').value,
-                subject: document.getElementById('subject').value,
-                school: document.getElementById('school').value,
-                address: document.getElementById('address').value,
-                phone: document.getElementById('phone').value,
-                social: document.getElementById('social').value
-                
+                subject: document.getElementById('subject').value.trim(),
+                school: document.getElementById('school').value.trim(),
+                address: document.getElementById('address').value.trim(),
+                phone: document.getElementById('phone').value.trim(),
+                social: document.getElementById('social').value.trim(),
+                timestamp: new Date().toISOString() // Thêm thời gian đăng ký
             };
+
+            // Kiểm tra dữ liệu đầu vào
+            if (!formData.studentName) {
+                messageElement.textContent = 'Vui lòng nhập tên học sinh.';
+                messageElement.className = 'error-message';
+                messageElement.style.display = 'block';
+                return;
+            }
+
+            if (!formData.phone) {
+                messageElement.textContent = 'Vui lòng nhập số điện thoại.';
+                messageElement.className = 'error-message';
+                messageElement.style.display = 'block';
+                return;
+            }
+
+            if (!validatePhoneNumber(formData.phone)) {
+                messageElement.textContent = 'Số điện thoại không hợp lệ. Vui lòng nhập 10 hoặc 11 số.';
+                messageElement.className = 'error-message';
+                messageElement.style.display = 'block';
+                return;
+            }
 
             console.log('Dữ liệu gửi đi:', formData); // Debug dữ liệu gửi
 
             try {
-                const webAppUrl = 'https://script.google.com/macros/s/AKfycbxZHcSOJuy4fRGEf_NcLxw9NtySQmCPRq8mJUtTHVW_pmNhhq1lbhq6GxtZvsXzgj0/exec'; // Thay bằng URL Web App của bạn
+                const webAppUrl = 'https://script.google.com/macros/s/AKfycbwuw8tlP_Z602mT_Q6xnQDKJRDZRNZx4fAqMnvFn66QQUs8OsbGtKDBf84dFHav7RA/exec'; // Thay bằng URL Web App của bạn
                 const response = await fetch(webAppUrl, {
                     method: 'POST',
                     body: JSON.stringify(formData),
@@ -734,14 +777,20 @@
                 console.log('Phản hồi từ Apps Script:', result); // Debug phản hồi
 
                 if (result.status === 'success') {
-                    alert('Đăng ký thành công! Chúng tôi sẽ liên hệ với bạn sớm.');
-                    this.reset();
+                    messageElement.textContent = 'Đăng ký thành công! Chúng tôi sẽ liên hệ với bạn sớm.';
+                    messageElement.className = 'success-message';
+                    messageElement.style.display = 'block';
+                    this.reset(); // Xóa form sau khi đăng ký thành công
                 } else {
-                    alert('Đăng ký thất bại: ' + result.message);
+                    messageElement.textContent = 'Đăng ký thất bại: ' + result.message;
+                    messageElement.className = 'error-message';
+                    messageElement.style.display = 'block';
                 }
             } catch (error) {
                 console.error('Lỗi khi gửi dữ liệu:', error); // Debug lỗi
-                alert('Lỗi khi gửi dữ liệu: ' + error.message);
+                messageElement.textContent = 'Lỗi khi gửi dữ liệu: ' + error.message;
+                messageElement.className = 'error-message';
+                messageElement.style.display = 'block';
             }
         });
 
