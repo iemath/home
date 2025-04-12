@@ -666,16 +666,18 @@
                 // Lọc dữ liệu và loại bỏ cột Mã lớp
                 const filteredHeaders = data[0].filter((_, index) => index !== classColumnIndex);
                 const filteredData = [filteredHeaders];
+                let matchFound = false;
                 for (let i = 1; i < data.length; i++) {
                     const classCode = data[i][classColumnIndex] ? data[i][classColumnIndex].trim() : '';
-                    console.log(`So sánh mã lớp: ${classCode} === ${code}`); // Debug so sánh
+                    console.log(`So sánh mã lớp: "${classCode}" === "${code}"`); // Debug so sánh
                     if (classCode === code) {
                         const rowData = data[i].filter((_, index) => index !== classColumnIndex);
                         filteredData.push(rowData);
+                        matchFound = true;
                     }
                 }
 
-                if (filteredData.length === 1) {
+                if (!matchFound || filteredData.length === 1) {
                     errorElement.textContent = 'Không tìm thấy dữ liệu cho mã lớp này.';
                     errorElement.style.display = 'block';
                     return;
