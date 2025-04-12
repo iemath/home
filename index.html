@@ -553,12 +553,15 @@
 
         // Hàm tải dữ liệu từ Google Sheets
         async function fetchSheetData(sheetName) {
-            const url = `https://sheets.googleapis.com/v4/spreadsheets/${spreadsheetId}/values/${sheetName}?key=${apiKey}`;
+            // Encode tên sheet để tránh lỗi ký tự đặc biệt
+            const encodedSheetName = encodeURIComponent(sheetName);
+            const url = `https://sheets.googleapis.com/v4/spreadsheets/${spreadsheetId}/values/${encodedSheetName}?key=${apiKey}`;
             console.log(`Gọi API cho sheet ${sheetName}: ${url}`); // Debug URL
             try {
                 const response = await fetch(url);
                 if (!response.ok) {
-                    throw new Error(`Lỗi khi gọi API: ${response.status} - ${response.statusText}`);
+                    const errorText = await response.text();
+                    throw new Error(`Lỗi khi gọi API: ${response.status} - ${response.statusText}. Chi tiết: ${errorText}`);
                 }
                 const data = await response.json();
                 console.log(`Dữ liệu từ sheet ${sheetName}:`, data.values); // Debug dữ liệu
@@ -652,9 +655,11 @@
             }
 
             try {
-                const data = await fetchSheetData('HKT2T3');
+                // Kiểm tra chính xác tên sheet
+                const sheetName = 'HKT2T3'; // Thay bằng tên chính xác của sheet
+                const data = await fetchSheetData(sheetName);
                 if (!data || data.length === 0) {
-                    throw new Error('Không có dữ liệu trong sheet HKT2T3');
+                    throw new Error(`Không có dữ liệu trong sheet ${sheetName}`);
                 }
 
                 console.log("Tiêu đề kết quả thi đua:", data[0]); // Debug tiêu đề
