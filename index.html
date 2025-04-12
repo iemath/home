@@ -700,6 +700,7 @@
         document.getElementById('registerForm').addEventListener('submit', async function(e) {
             e.preventDefault();
             const formData = {
+                timestamp: new Date().toISOString(), // Thêm thời gian đăng ký
                 studentName: document.getElementById('studentName').value,
                 parentName: document.getElementById('parentName').value,
                 class: document.getElementById('class').value,
@@ -707,8 +708,8 @@
                 school: document.getElementById('school').value,
                 address: document.getElementById('address').value,
                 phone: document.getElementById('phone').value,
-                social: document.getElementById('social').value,
-                timestamp: new Date().toISOString() // Thêm thời gian đăng ký
+                social: document.getElementById('social').value
+                
             };
 
             console.log('Dữ liệu gửi đi:', formData); // Debug dữ liệu gửi
