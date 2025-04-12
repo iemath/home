@@ -475,6 +475,7 @@
 
         // Hàm tạo bảng
         function createTable(data, rankColumnIndex = -1) {
+            console.log("Dữ liệu để tạo bảng:", data); // Debug dữ liệu
             const table = document.createElement('table');
             const thead = document.createElement('thead');
             const headerRow = document.createElement('tr');
@@ -510,6 +511,7 @@
 
         // Hàm tạo bảng vinh danh
         function createHonorTable(data) {
+            console.log("Dữ liệu bảng vinh danh:", data); // Debug dữ liệu
             const table = document.createElement('table');
             table.className = 'honor-table';
             const thead = document.createElement('thead');
@@ -552,16 +554,28 @@
         // Hàm tải dữ liệu từ Google Sheets
         async function fetchSheetData(sheetName) {
             const url = `https://sheets.googleapis.com/v4/spreadsheets/${spreadsheetId}/values/${sheetName}?key=${apiKey}`;
-            const response = await fetch(url);
-            if (!response.ok) throw new Error('Không thể tải dữ liệu');
-            const data = await response.json();
-            return data.values;
+            console.log(`Gọi API cho sheet ${sheetName}: ${url}`); // Debug URL
+            try {
+                const response = await fetch(url);
+                if (!response.ok) {
+                    throw new Error(`Lỗi khi gọi API: ${response.status} - ${response.statusText}`);
+                }
+                const data = await response.json();
+                console.log(`Dữ liệu từ sheet ${sheetName}:`, data.values); // Debug dữ liệu
+                return data.values;
+            } catch (error) {
+                console.error(`Lỗi khi tải dữ liệu từ sheet ${sheetName}:`, error);
+                throw error;
+            }
         }
 
         // Hàm tải bảng vinh danh
         async function loadHonorTable() {
             try {
                 const data = await fetchSheetData('Vinh danh');
+                if (!data || data.length === 0) {
+                    throw new Error('Không có dữ liệu trong sheet Vinh danh');
+                }
                 const table = createHonorTable(data);
                 document.getElementById('honorTable').innerHTML = '';
                 document.getElementById('honorTable').appendChild(table);
@@ -579,20 +593,40 @@
             errorElement.style.display = 'none';
             tableElement.innerHTML = '';
 
+            if (!code) {
+                errorElement.textContent = 'Vui lòng nhập mã học sinh.';
+                errorElement.style.display = 'block';
+                return;
+            }
+
             try {
                 const data = await fetchSheetData('Bảng điểm');
+                if (!data || data.length === 0) {
+                    throw new Error('Không có dữ liệu trong sheet Bảng điểm');
+                }
+
+                console.log("Tiêu đề bảng điểm:", data[0]); // Debug tiêu đề
+                const studentIdColumnIndex = data[0].indexOf('Mã học sinh');
+                if (studentIdColumnIndex === -1) {
+                    throw new Error('Không tìm thấy cột "Mã học sinh" trong bảng dữ liệu');
+                }
+
                 const filteredData = [data[0]]; // Giữ hàng tiêu đề
                 for (let i = 1; i < data.length; i++) {
-                    if (data[i][0] && data[i][0].trim() === code) { // So khớp với cột Mã học sinh (cột 0)
+                    const studentId = data[i][studentIdColumnIndex] ? data[i][studentIdColumnIndex].trim() : '';
+                    console.log(`So sánh mã học sinh: ${studentId} === ${code}`); // Debug so sánh
+                    if (studentId === code) {
                         filteredData.push(data[i]);
                         break;
                     }
                 }
+
                 if (filteredData.length === 1) {
                     errorElement.textContent = 'Không tìm thấy mã học sinh này.';
                     errorElement.style.display = 'block';
                     return;
                 }
+
                 const table = createTable(filteredData);
                 tableElement.appendChild(table);
                 lastUpdatedElement.textContent = `Cập nhật lúc: ${formatDateTime(new Date())}`;
@@ -611,23 +645,36 @@
             errorElement.style.display = 'none';
             tableElement.innerHTML = '';
 
+            if (!code) {
+                errorElement.textContent = 'Vui lòng nhập mã lớp.';
+                errorElement.style.display = 'block';
+                return;
+            }
+
             try {
                 const data = await fetchSheetData('HKT2T3');
-                const headers = data[0];
-                const classColumnIndex = headers.indexOf('Mã lớp');
+                if (!data || data.length === 0) {
+                    throw new Error('Không có dữ liệu trong sheet HKT2T3');
+                }
+
+                console.log("Tiêu đề kết quả thi đua:", data[0]); // Debug tiêu đề
+                const classColumnIndex = data[0].indexOf('Mã lớp');
                 if (classColumnIndex === -1) {
                     throw new Error('Không tìm thấy cột "Mã lớp" trong bảng dữ liệu');
                 }
 
                 // Lọc dữ liệu và loại bỏ cột Mã lớp
-                const filteredHeaders = headers.filter((_, index) => index !== classColumnIndex);
+                const filteredHeaders = data[0].filter((_, index) => index !== classColumnIndex);
                 const filteredData = [filteredHeaders];
                 for (let i = 1; i < data.length; i++) {
-                    if (data[i][classColumnIndex] && data[i][classColumnIndex].trim() === code) {
+                    const classCode = data[i][classColumnIndex] ? data[i][classColumnIndex].trim() : '';
+                    console.log(`So sánh mã lớp: ${classCode} === ${code}`); // Debug so sánh
+                    if (classCode === code) {
                         const rowData = data[i].filter((_, index) => index !== classColumnIndex);
                         filteredData.push(rowData);
                     }
                 }
+
                 if (filteredData.length === 1) {
                     errorElement.textContent = 'Không tìm thấy dữ liệu cho mã lớp này.';
                     errorElement.style.display = 'block';
