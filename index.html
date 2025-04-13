@@ -721,51 +721,47 @@
             messageElement.style.display = 'none';
 
             // Lấy dữ liệu từ form
-            const formData = {
-                studentName: document.getElementById('studentName').value.trim(),
-                parentName: document.getElementById('parentName').value.trim(),
-                class: document.getElementById('class').value,
-                subject: document.getElementById('subject').value.trim(),
-                school: document.getElementById('school').value.trim(),
-                address: document.getElementById('address').value.trim(),
-                phone: document.getElementById('phone').value.trim(),
-                social: document.getElementById('social').value.trim(),
-                timestamp: new Date().toISOString() // Thêm thời gian đăng ký
-            };
+            const formData = new FormData();
+            formData.append('studentName', document.getElementById('studentName').value.trim());
+            formData.append('parentName', document.getElementById('parentName').value.trim());
+            formData.append('class', document.getElementById('class').value);
+            formData.append('subject', document.getElementById('subject').value.trim());
+            formData.append('school', document.getElementById('school').value.trim());
+            formData.append('address', document.getElementById('address').value.trim());
+            formData.append('phone', document.getElementById('phone').value.trim());
+            formData.append('social', document.getElementById('social').value.trim());
+            formData.append('timestamp', new Date().toISOString());
 
             // Kiểm tra dữ liệu đầu vào
-            if (!formData.studentName) {
+            if (!formData.get('studentName')) {
                 messageElement.textContent = 'Vui lòng nhập tên học sinh.';
                 messageElement.className = 'error-message';
                 messageElement.style.display = 'block';
                 return;
             }
 
-            if (!formData.phone) {
+            if (!formData.get('phone')) {
                 messageElement.textContent = 'Vui lòng nhập số điện thoại.';
                 messageElement.className = 'error-message';
                 messageElement.style.display = 'block';
                 return;
             }
 
-            if (!validatePhoneNumber(formData.phone)) {
+            if (!validatePhoneNumber(formData.get('phone'))) {
                 messageElement.textContent = 'Số điện thoại không hợp lệ. Vui lòng nhập 10 hoặc 11 số.';
                 messageElement.className = 'error-message';
                 messageElement.style.display = 'block';
                 return;
             }
 
-            console.log('Dữ liệu gửi đi:', formData); // Debug dữ liệu gửi
+            console.log('Dữ liệu gửi đi:', Object.fromEntries(formData)); // Debug dữ liệu gửi
 
             try {
-                const webAppUrl = 'https://script.google.com/macros/s/AKfycbwuw8tlP_Z602mT_Q6xnQDKJRDZRNZx4fAqMnvFn66QQUs8OsbGtKDBf84dFHav7RA/exec'; // Thay bằng URL Web App của bạn
+                const webAppUrl = 'https://script.google.com/macros/s/AKfycbxlOuTPqy3iufaY2kOAqdhh4buNF2ZkFO0AMUMtsE_t7pLrm5gRkq97vcFT45Z58i4/exec'; // Thay bằng URL Web App của bạn
                 const response = await fetch(webAppUrl, {
                     method: 'POST',
-                    body: JSON.stringify(formData),
-                    headers: {
-                        'Content-Type': 'application/json'
-                    },
-                    mode: 'cors' // Đảm bảo CORS được bật
+                    body: formData // Sử dụng FormData thay vì JSON
+                    // Không cần headers 'Content-Type', fetch sẽ tự động đặt thành 'multipart/form-data'
                 });
 
                 if (!response.ok) {
