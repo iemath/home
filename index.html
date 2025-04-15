@@ -98,6 +98,12 @@
             box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
         }
 
+        nav ul li a.active {
+            background-color: var(--primary-color);
+            color: white;
+            font-weight: 600;
+        }
+
         nav ul li a i {
             font-size: 1.2rem;
         }
@@ -173,7 +179,8 @@
             background-color: #fff;
         }
 
-        .form-group input[required] {
+        .form-group input[required],
+        .form-group select[required] {
             border-color: var(--primary-color);
         }
 
@@ -343,10 +350,10 @@
 
         <nav>
             <ul>
-                <li><a href="#home" onclick="showSection('home')"><i class="fas fa-home"></i> Trang chủ</a></li>
-                <li><a href="#register" onclick="showSection('register')"><i class="fas fa-user-plus"></i> Đăng ký học</a></li>
-                <li><a href="#scores" onclick="showSection('scores')"><i class="fas fa-table"></i> Bảng điểm học sinh</a></li>
-                <li><a href="#competition" onclick="showSection('competition')"><i class="fas fa-trophy"></i> Kết quả thi đua</a></li>
+                <li><a href="#home" onclick="showSection('home')" id="nav-home"><i class="fas fa-home"></i> Trang chủ</a></li>
+                <li><a href="#register" onclick="showSection('register')" id="nav-register"><i class="fas fa-user-plus"></i> Đăng ký học</a></li>
+                <li><a href="#scores" onclick="showSection('scores')" id="nav-scores"><i class="fas fa-table"></i> Bảng điểm học sinh</a></li>
+                <li><a href="#competition" onclick="showSection('competition')" id="nav-competition"><i class="fas fa-trophy"></i> Kết quả thi đua</a></li>
             </ul>
         </nav>
 
@@ -397,7 +404,6 @@
                         <option value="Toán">Toán</option>
                         <option value="Lí Hóa">Lí Hóa</option>
                     </select>
-                    
                 </div>
                 <div class="form-group">
                     <label for="school">Trường</label>
@@ -439,8 +445,26 @@
         <div class="section" id="competition">
             <h2>Kết quả thi đua</h2>
             <div class="form-group">
+                <label for="monthSelect">Chọn tháng</label>
+                <select id="monthSelect" required>
+                    <option value="">Chọn tháng</option>
+                    <option value="1">Tháng 1</option>
+                    <option value="2">Tháng 2</option>
+                    <option value="3">Tháng 3</option>
+                    <option value="4">Tháng 4</option>
+                    <option value="5">Tháng 5</option>
+                    <option value="6">Tháng 6</option>
+                    <option value="7">Tháng 7</option>
+                    <option value="8">Tháng 8</option>
+                    <option value="9">Tháng 9</option>
+                    <option value="10">Tháng 10</option>
+                    <option value="11">Tháng 11</option>
+                    <option value="12">Tháng 12</option>
+                </select>
+            </div>
+            <div class="form-group">
                 <label for="competitionCode">Nhập mã lớp để xem kết quả thi đua</label>
-                <input type="text" id="competitionCode" placeholder="Ví dụ: HSLH07">
+                <input type="text" id="competitionCode" placeholder="Ví dụ: HSLH07" required>
                 <button onclick="loadCompetition()">Xem</button>
             </div>
             <div class="last-updated" id="competitionLastUpdated">Cập nhật lúc: Chưa tải dữ liệu</div>
@@ -455,7 +479,7 @@
             <p><strong>Trung tâm IEMATH</strong></p>
             <p>Địa chỉ: Nguyễn Hữu Dực, KP Phú Thọ 2, TX Đông Hòa</p>
             <p>Số điện thoại: 035 4842 111</p>
-            <p>Email: iemath88@.gmail.com</p>
+            <p>Email: iemath88@gmail.com</p>
         </footer>
     </div>
 
@@ -464,12 +488,21 @@
         const apiKey = 'AIzaSyDeU6hRBATWrsagRwk4n80-K8ZhpOiYuaQ'; // Thay bằng API Key của bạn
         const spreadsheetId = '1Pu-iUUpGsofrBbInwmns7vLai1_gwmDEvbWvGnYjd8I';
 
-        // Hiển thị section
+        // Hiển thị section và làm nổi bật tab đang chọn
         function showSection(sectionId) {
+            // Ẩn tất cả section và xóa class active của các tab
             document.querySelectorAll('.section').forEach(section => {
                 section.classList.remove('active');
             });
+            document.querySelectorAll('nav ul li a').forEach(link => {
+                link.classList.remove('active');
+            });
+
+            // Hiển thị section được chọn và làm nổi bật tab tương ứng
             document.getElementById(sectionId).classList.add('active');
+            document.getElementById(`nav-${sectionId}`).classList.add('active');
+
+            // Tải dữ liệu cho section Trang chủ nếu cần
             if (sectionId === 'home') {
                 loadHonorTable();
             }
@@ -656,12 +689,20 @@
 
         // Hàm tải kết quả thi đua
         async function loadCompetition() {
+            const month = document.getElementById('monthSelect').value; // Lấy tháng được chọn
             const code = document.getElementById('competitionCode').value.trim(); // Loại bỏ khoảng trống
             const errorElement = document.getElementById('competitionError');
             const tableElement = document.getElementById('competitionTable');
             const lastUpdatedElement = document.getElementById('competitionLastUpdated');
             errorElement.style.display = 'none';
             tableElement.innerHTML = '';
+
+            // Kiểm tra dữ liệu đầu vào
+            if (!month) {
+                errorElement.textContent = 'Vui lòng chọn tháng.';
+                errorElement.style.display = 'block';
+                return;
+            }
 
             if (!code) {
                 errorElement.textContent = 'Vui lòng nhập mã lớp.';
@@ -670,7 +711,7 @@
             }
 
             try {
-                const sheetName = 'HK2T3'; // Sửa tên sheet thành HK2T3
+                const sheetName = 'HK2T3'; // Lấy dữ liệu từ sheet HK2T3
                 const data = await fetchSheetData(sheetName);
                 if (!data || data.length === 0) {
                     throw new Error(`Không có dữ liệu trong sheet ${sheetName}`);
@@ -678,26 +719,32 @@
 
                 console.log("Tiêu đề kết quả thi đua:", data[0]); // Debug tiêu đề
                 const classColumnIndex = data[0].indexOf('Mã lớp');
+                const monthColumnIndex = data[0].indexOf('Tháng'); // Tìm cột "Tháng" để lọc và ẩn
+
                 if (classColumnIndex === -1) {
                     throw new Error('Không tìm thấy cột "Mã lớp" trong bảng dữ liệu');
                 }
+                if (monthColumnIndex === -1) {
+                    throw new Error('Không tìm thấy cột "Tháng" trong bảng dữ liệu');
+                }
 
-                // Lọc dữ liệu và loại bỏ cột Mã lớp
-                const filteredHeaders = data[0].filter((_, index) => index !== classColumnIndex);
+                // Lọc dữ liệu dựa trên "Mã lớp" và "Tháng", đồng thời loại bỏ cột "Mã lớp" và "Tháng"
+                const filteredHeaders = data[0].filter((header, index) => index !== classColumnIndex && index !== monthColumnIndex);
                 const filteredData = [filteredHeaders];
                 let matchFound = false;
                 for (let i = 1; i < data.length; i++) {
                     const classCode = data[i][classColumnIndex] ? data[i][classColumnIndex].trim() : '';
-                    console.log(`So sánh mã lớp: "${classCode}" === "${code}"`); // Debug so sánh
-                    if (classCode === code) {
-                        const rowData = data[i].filter((_, index) => index !== classColumnIndex);
+                    const monthValue = data[i][monthColumnIndex] ? data[i][monthColumnIndex].trim() : '';
+                    console.log(`So sánh mã lớp: "${classCode}" === "${code}" và tháng: "${monthValue}" === "${month}"`); // Debug so sánh
+                    if (classCode === code && monthValue === month) {
+                        const rowData = data[i].filter((_, index) => index !== classColumnIndex && index !== monthColumnIndex);
                         filteredData.push(rowData);
                         matchFound = true;
                     }
                 }
 
                 if (!matchFound || filteredData.length === 1) {
-                    errorElement.textContent = 'Không tìm thấy dữ liệu cho mã lớp này.';
+                    errorElement.textContent = 'Không tìm thấy dữ liệu cho mã lớp và tháng đã chọn.';
                     errorElement.style.display = 'block';
                     return;
                 }
@@ -762,11 +809,10 @@
             console.log('Dữ liệu gửi đi:', Object.fromEntries(formData)); // Debug dữ liệu gửi
 
             try {
-                const webAppUrl = 'https://script.google.com/macros/s/AKfycbxlOuTPqy3iufaY2kOAqdhh4buNF2ZkFO0AMUMtsE_t7pLrm5gRkq97vcFT45Z58i4/exec'; // Thay bằng URL Web App của bạn
+                const webAppUrl = 'https://script.google.com/macros/s/AKfycby0EfaczArsyRYum3-xig7NzyQo6-W8N8CF_IxtKZ73oSnXxJp-2YnzqejKp7RQ4sE/exec'; // Thay bằng URL Web App của bạn
                 const response = await fetch(webAppUrl, {
                     method: 'POST',
                     body: formData // Sử dụng FormData thay vì JSON
-                    // Không cần headers 'Content-Type', fetch sẽ tự động đặt thành 'multipart/form-data'
                 });
 
                 if (!response.ok) {
@@ -795,8 +841,8 @@
             }
         });
 
-        // Tải bảng vinh danh khi trang được tải
-        loadHonorTable();
+        // Tải bảng vinh danh khi trang được tải và làm nổi bật tab Trang chủ
+        showSection('home');
     </script>
 </body>
 </html>
